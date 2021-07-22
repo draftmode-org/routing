@@ -3,9 +3,9 @@ namespace singleframe\Tests\Routing\Unit;
 
 use JsonSerializable;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
 use singleframe\Http\Request\HttpRequest;
 use singleframe\Http\Response\HttpResponse;
-use singleframe\Http\Response\IHttpResponse;
 use singleframe\Injector\Injector;
 use singleframe\Log\ILogger;
 use singleframe\Log\Logger;
@@ -73,7 +73,7 @@ class RouterTestClassController {
      * @Route:uri /targets
      * @Route:method get
      */
-    public function getAd(int $id, string $question) : IHttpResponse {
+    public function getAd(int $id, string $question) : ResponseInterface {
         return new HttpResponse(200);
     }
 
@@ -81,7 +81,7 @@ class RouterTestClassController {
      * @Route:uri /
      * @Route:method get
      */
-    public function getEmpty() : IHttpResponse {
+    public function getEmpty() : ResponseInterface {
         return (new HttpResponse)::createEmptyResponse(200);
         //return (new HttpResponse)::createJsonResponse(200, ["publicInt" => 12]);
         //return (new HttpResponse)::createJsonResponse(200, new RouterTestResponseObject());
@@ -92,7 +92,7 @@ class RouterTestClassController {
      * @Route:uri /
      * @Route:method post
      */
-    public function postAd() : IHttpResponse {
+    public function postAd() : ResponseInterface {
         return new HttpResponse(200);
     }
 
@@ -100,7 +100,7 @@ class RouterTestClassController {
      * @Route:uri /
      * @Route:method put
      */
-    public function putAd() : IHttpResponse {
+    public function putAd() : ResponseInterface {
         return new HttpResponse(201);
     }
 }

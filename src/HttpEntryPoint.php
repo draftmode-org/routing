@@ -24,12 +24,11 @@ class HttpEntryPoint implements IHttpEntryPoint {
         $this->injector                             = $injector;
         //
         $this->injector->push(IRouteClassBuilder::class, $routeClassBuilder);
-        //
-        //$this->injector->getLogger()->path()->push(self::class);
+        $this->injector->getLogger()->startClass(self::class);
     }
 
     public function __destruct() {
-        $this->injector->getLogger()->breadcrumb()->pop();
+        $this->injector->getLogger()->endClass();
     }
 
     public function process() : void {
