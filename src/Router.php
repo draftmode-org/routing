@@ -5,7 +5,7 @@ use singleframe\Http\Request\IHttpRequest;
 use singleframe\Http\Response\HttpResponse;
 use singleframe\Http\Response\IHttpResponse;
 use singleframe\Injector\IInjector;
-use singleframe\Logger\ILogger;
+use singleframe\Log\ILogger;
 use singleframe\Routing\Exception\RouteClassMethodNotFoundException;
 use singleframe\Routing\Exception\RouteClassNotFoundException;
 use singleframe\Routing\Exception\RouteMissingParameterException;
@@ -28,9 +28,12 @@ class Router implements IRouter {
         $this->routesBuilder                        = $routesBuilder;
         $this->injector                             = $injector;
         $this->logger                               = $logger;
+        $this->logger->startClass(self::class);
     }
 
-    public function __destruct() {}
+    public function __destruct() {
+        $this->logger->endClass();
+    }
 
     public function process(IHttpRequest $request) : IHttpResponse {
         $this->request                              = $request;
@@ -62,7 +65,6 @@ class Router implements IRouter {
                 $result                             = new HttpResponse(501);
             }
         }
-        $this->logger->endMethod();
         return $result;
     }
 
