@@ -1,0 +1,29 @@
+{
+    "name": "singleframe/routing",
+    "version": "0.0.1",
+    "description": "routing",
+    "license": "MIT",
+    "config" : {
+        "vendor-dir" : "plugin"
+    },
+    "authors": [
+        {
+            "name": "Peter Fux",
+            "email": "it@noframework.io"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "singleframe\\Routing\\" : "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "singleframe\\Test\\Routing\\" : "tests/"
+        }
+    },
+    "minimum-stability": "dev"
+}
