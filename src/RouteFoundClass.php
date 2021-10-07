@@ -1,11 +1,11 @@
 <?php
 namespace Terrazza\Component\Routing;
 
-class RouteMatch {
-    private Route $route;
+class RouteFoundClass {
+    private RouteInterface $route;
     private int $preMatchPosition;
 
-    public function __construct(Route $route, int $preMatchPosition=0) {
+    public function __construct(RouteInterface $route, int $preMatchPosition=0) {
         $this->route                                = $route;
         $this->preMatchPosition                     = $preMatchPosition;
     }

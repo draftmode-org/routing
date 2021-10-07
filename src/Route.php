@@ -1,7 +1,7 @@
 <?php
 namespace Terrazza\Component\Routing;
 
-class Route {
+class Route implements RouteInterface {
     private string $routeUri;
     private string $routeClassName;
     private ?array $methods;
@@ -12,7 +12,11 @@ class Route {
         $this->methods                              = $methods;
     }
 
-    function hasMethod(string $method) : bool {
+    /**
+     * @param string $method
+     * @return bool
+     */
+    public function hasMethod(string $method) : bool {
         if ($this->methods) {
             if ($method === "HEAD") $method = "GET";
             foreach ($this->methods as $routeMethod) {
@@ -25,38 +29,41 @@ class Route {
         return true;
     }
 
+    /**
+     * @return string
+     */
     public function getRouteUri() : string {
         return $this->routeUri;
     }
 
+    /**
+     * @return string
+     */
     public function getRouteClassName() : string {
         return $this->routeClassName;
     }
 
-    protected function cleanUri(string $uri) : string {
-        if (substr($uri, -1) === "/") {
-            return substr($uri, 0, -1);
-        }
-        return $uri;
-    }
-
-    function hasRoute(string $uri) :?RouteMatch {
-        $uri                                        = $this->cleanUri($uri);
-        $routePath                                  = $this->cleanUri($this->routeUri);
+    /**
+     * @param string $uri
+     * @return RouteFoundClass|null
+     */
+    public function getMatchedRoute(string $uri) :?RouteFoundClass {
+        $uri                                        = trim($uri, "/");
+        $routePath                                  = trim($this->routeUri, "/");
         $preMatchPosition                           = 0;
         if (preg_match_all('#\{([\w\_]+)\}#', $routePath, $matches, PREG_OFFSET_CAPTURE)) {
             $preMatchPosition                       = $matches[1][0][1];
         }
         if (strlen($routePath) === 0 && strlen($uri) === 0) {
-            return new RouteMatch($this, 0);
+            return new RouteFoundClass($this, 0);
         }
         $rRoutePath                                 = $routePath;
         $routePath                                  = '^' . preg_replace('#\{[\w\_]+\}#', '(.+?)', $routePath) . '$';
-        if (preg_match("#".$routePath."#", "/" . trim($uri, "/"), $matches)) {
-            return new RouteMatch($this, $preMatchPosition);
+        if (preg_match("#".$routePath."#", trim($uri, "/"), $matches)) {
+            return new RouteFoundClass($this, $preMatchPosition);
         } else {
             if (strlen($rRoutePath) && strpos($uri, $rRoutePath) !== false) {
-                return new RouteMatch($this, 0);
+                return new RouteFoundClass($this, 0);
             }
             return null;
         }
