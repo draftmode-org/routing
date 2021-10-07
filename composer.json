@@ -2,7 +2,7 @@
     "name": "terrazza/routing",
     "type" : "library",
     "version": "1.0.0",
-    "description": "routing",
+    "description": "Terrazza Component Routing",
     "license": "MIT",
     "config" : {
         "vendor-dir" : "plugin"
