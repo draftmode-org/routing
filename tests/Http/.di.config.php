@@ -1,7 +1,7 @@
 <?php
 
-use singleframe\Routing\IRouteClassMethodBuilder;
-use singleframe\Routing\RouteBuilder\RouteClassMethodAnnotationBuilder;
+use Terrazza\Component\Routing\IRouteClassMethodBuilder;
+use Terrazza\Component\Routing\RouteBuilder\RouteClassMethodAnnotationBuilder;
 
 return [
     IRouteClassMethodBuilder::class                    => RouteClassMethodAnnotationBuilder::class,

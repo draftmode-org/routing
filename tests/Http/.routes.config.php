@@ -1,8 +1,8 @@
 <?php
 
-use singleframe\Routing\Route;
-use singleframe\Tests\Routing\Unit\RouterTestClassController;
-use singleframe\Tests\Routing\Unit\RouterTestClassController2;
+use Terrazza\Component\Routing\Route;
+use Terrazza\Tests\Routing\Unit\RouterTestClassController;
+use Terrazza\Tests\Routing\Unit\RouterTestClassController2;
 
 return [
     new Route("/", RouterTestClassController::class),

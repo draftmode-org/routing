@@ -1,11 +1,11 @@
 <?php
-namespace singleframe\Routing\RouteBuilder;
+namespace Terrazza\Component\Routing\RouteBuilder;
 
-use singleframe\Routing\Exception\RouteCollectionClassBuilderException;
-use singleframe\Routing\IRouteClassBuilder;
-use singleframe\Routing\IRouteClassMethodBuilder;
-use singleframe\Routing\Route;
-use singleframe\Routing\RouteCollection;
+use Terrazza\Component\Routing\Exception\RouteCollectionClassBuilderException;
+use Terrazza\Component\Routing\IRouteClassBuilder;
+use Terrazza\Component\Routing\IRouteClassMethodBuilder;
+use Terrazza\Component\Routing\Route;
+use Terrazza\Component\Routing\RouteCollection;
 use Throwable;
 
 class RouteClassBuilder implements IRouteClassBuilder {

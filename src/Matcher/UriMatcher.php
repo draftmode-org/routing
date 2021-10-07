@@ -1,10 +1,10 @@
 <?php
-namespace singleframe\Routing\Matcher;
+namespace Terrazza\Component\Routing\Matcher;
 
-use singleframe\Http\Request\IHttpRequest;
-use singleframe\Routing\Route;
-use singleframe\Routing\RouteCollection;
-use singleframe\Routing\RouteMatch;
+use Terrazza\Http\Request\IHttpRequest;
+use Terrazza\Component\Routing\Route;
+use Terrazza\Component\Routing\RouteCollection;
+use Terrazza\Component\Routing\RouteMatch;
 
 class UriMatcher {
     private RouteCollection $routes;

@@ -1,3 +1,3 @@
 <?php
-namespace singleframe\Routing\Exception;
+namespace Terrazza\Component\Routing\Exception;
 class RouteCollectionClassBuilderException extends RouteException {}

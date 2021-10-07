@@ -1,8 +1,8 @@
 <?php
-namespace singleframe\Routing\RouteBuilder;
-use singleframe\Routing\IRouteClassMethodBuilder;
-use singleframe\Routing\Route;
-use singleframe\Routing\RouteCollection;
+namespace Terrazza\Component\Routing\RouteBuilder;
+use Terrazza\Component\Routing\IRouteClassMethodBuilder;
+use Terrazza\Component\Routing\Route;
+use Terrazza\Component\Routing\RouteCollection;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;

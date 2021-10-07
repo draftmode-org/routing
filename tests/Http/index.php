@@ -1,10 +1,10 @@
 <?php
-use singleframe\Http\Message\HttpMessageAdapter;
-use singleframe\Injector\Injector;
-use singleframe\Log\Logger;
-use singleframe\Routing\HttpEntryPoint;
-use singleframe\Routing\RouteBuilder\RouteClassBuilder;
-use singleframe\Routing\RouteBuilder\RouteClassMethodAnnotationBuilder;
+use Terrazza\Http\Message\HttpMessageAdapter;
+use Terrazza\Injector\Injector;
+use Terrazza\Log\Logger;
+use Terrazza\Component\Routing\HttpEntryPoint;
+use Terrazza\Component\Routing\RouteBuilder\RouteClassBuilder;
+use Terrazza\Component\Routing\RouteBuilder\RouteClassMethodAnnotationBuilder;
 
 require_once ("../../plugin/autoload.php");
 require_once ("../../tests/Unit/RouterTest.php");

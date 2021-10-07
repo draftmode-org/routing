@@ -1,20 +1,20 @@
 <?php
-namespace singleframe\Tests\Routing\Unit;
+namespace Terrazza\Tests\Routing\Unit;
 
 use JsonSerializable;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
-use singleframe\Http\Request\HttpRequest;
-use singleframe\Http\Response\HttpResponse;
-use singleframe\Injector\Injector;
-use singleframe\Log\ILogger;
-use singleframe\Log\Logger;
-use singleframe\Routing\IRouteClassMethodBuilder;
-use singleframe\Routing\Route;
-use singleframe\Routing\RouteBuilder\RouteClassBuilder;
-use singleframe\Routing\RouteBuilder\RouteClassMethodAnnotationBuilder;
-use singleframe\Routing\RouteCollection;
-use singleframe\Routing\Router;
+use Terrazza\Http\Request\HttpRequest;
+use Terrazza\Http\Response\HttpResponse;
+use Terrazza\Injector\Injector;
+use Terrazza\Log\ILogger;
+use Terrazza\Log\Logger;
+use Terrazza\Component\Routing\IRouteClassMethodBuilder;
+use Terrazza\Component\Routing\Route;
+use Terrazza\Component\Routing\RouteBuilder\RouteClassBuilder;
+use Terrazza\Component\Routing\RouteBuilder\RouteClassMethodAnnotationBuilder;
+use Terrazza\Component\Routing\RouteCollection;
+use Terrazza\Component\Routing\Router;
 
 class RouterTest extends TestCase {
 

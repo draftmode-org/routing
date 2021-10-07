@@ -1,8 +1,8 @@
 <?php
-namespace singleframe\Routing;
+namespace Terrazza\Component\Routing;
 
-use singleframe\Http\Request\IHttpRequest;
-use singleframe\Http\Response\IHttpResponse;
+use Terrazza\Http\Request\IHttpRequest;
+use Terrazza\Http\Response\IHttpResponse;
 
 interface IRouter {
     public function process(IHttpRequest $request) : IHttpResponse;

@@ -1,5 +1,5 @@
 <?php
-namespace singleframe\Routing;
+namespace Terrazza\Component\Routing;
 
 class RouteMatch {
     private Route $route;

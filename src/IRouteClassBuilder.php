@@ -1,5 +1,5 @@
 <?php
-namespace singleframe\Routing;
+namespace Terrazza\Component\Routing;
 
 interface IRouteClassBuilder {
     public function getClassRoutes(): RouteCollection;

@@ -1,11 +1,11 @@
 <?php
-namespace singleframe\Tests\Routing\Unit;
+namespace Terrazza\Tests\Routing\Unit;
 
 use PHPUnit\Framework\TestCase;
-use singleframe\Http\Request\HttpRequest;
-use singleframe\Routing\Matcher\UriMatcher;
-use singleframe\Routing\Route;
-use singleframe\Routing\RouteCollection;
+use Terrazza\Http\Request\HttpRequest;
+use Terrazza\Component\Routing\Matcher\UriMatcher;
+use Terrazza\Component\Routing\Route;
+use Terrazza\Component\Routing\RouteCollection;
 
 class RouteBestMatchTest extends TestCase {
     function testRoutingCollectionNoParams1() {

@@ -1,15 +1,15 @@
 <?php
-namespace singleframe\Routing;
+namespace Terrazza\Component\Routing;
 
-use singleframe\Http\Request\IHttpRequest;
-use singleframe\Http\Response\HttpResponse;
-use singleframe\Http\Response\IHttpResponse;
-use singleframe\Injector\IInjector;
-use singleframe\Log\ILogger;
-use singleframe\Routing\Exception\RouteClassMethodNotFoundException;
-use singleframe\Routing\Exception\RouteClassNotFoundException;
-use singleframe\Routing\Exception\RouteMissingParameterException;
-use singleframe\Routing\Matcher\UriMatcher;
+use Terrazza\Http\Request\IHttpRequest;
+use Terrazza\Http\Response\HttpResponse;
+use Terrazza\Http\Response\IHttpResponse;
+use Terrazza\Injector\IInjector;
+use Terrazza\Log\ILogger;
+use Terrazza\Component\Routing\Exception\RouteClassMethodNotFoundException;
+use Terrazza\Component\Routing\Exception\RouteClassNotFoundException;
+use Terrazza\Component\Routing\Exception\RouteMissingParameterException;
+use Terrazza\Component\Routing\Matcher\UriMatcher;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionObject;
