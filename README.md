@@ -24,9 +24,9 @@ To split the routing into a mainController and methods inside is useful if you w
 methods for a given route. 
 
 To get a valid method from a class a method annotation is required!<br>
-@Route/uri {string}, is required<br>
-<i>the uri is based on his parent class and is the extension of it</i>
-@Route/method {string}, is optional<br>
+@Route/uri {string} <b>(required)</b><br>
+<i>the uri is based on his parent class and is the extension of it</i><br>
+@Route/method {string} <b>(optional)</b><br>
 
 The default prefix for that annotation /uri and /method is @Route.<br>
 <i>can be modified within the __constructor of RouteMatcher</i><br><br>
