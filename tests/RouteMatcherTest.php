@@ -2,110 +2,198 @@
 
 namespace Terrazza\Component\Routing\Tests;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Terrazza\Component\Routing\Route;
-use Terrazza\Component\Routing\RouteCollection;
 use Terrazza\Component\Routing\RouteMatcher;
 use Terrazza\Component\Routing\RouteSearchClass;
 
-class RouteMatcherTest extends TestCase {
+class RouteMatcherGetRouteTest extends TestCase {
 
-    function testRoutingCollectionNotFound() {
-        $collection         = new RouteCollection(
-            new Route("/tests", RouteMatcherTestController1::class),
-        );
-        $matcher            = new RouteMatcher($collection);
+    function testNotFound() {
+        $route = (new RouteMatcher())->getRoute(
+            new RouteSearchClass("xy"), [
+            new Route("/tests", RouteMatcherGetRouteTestController1::class)
+        ]);
         $this->assertEquals(
             null,
-            $matcher->match(new RouteSearchClass("xy"))
+            $route
         );
     }
 
-    function testRoutingCollectionNoParams1() {
-        $collection         = new RouteCollection(
-            new Route("/tests", $found = RouteMatcherTestController1::class),
-            new Route("/tests/after", RouteMatcherTestController2::class),
-        );
-        $matcher            = new RouteMatcher($collection);
+    function testFoundNoParams1() {
+        $route = (new RouteMatcher())->getRoute(
+            new RouteSearchClass("/tests"), [
+            new Route("/tests", $found = RouteMatcherGetRouteTestController1::class)
+        ]);
         $this->assertEquals(
             $found,
-            $matcher->match(new RouteSearchClass("/tests"))->getRouteClassName()
+            $route->getClassName()
         );
     }
 
-    function testRoutingCollectionNoParams2() {
-        $collection         = new RouteCollection(
-            new Route("/tests/after", RouteMatcherTestController2::class),
-            new Route("/tests", $found = RouteMatcherTestController1::class),
-        );
-        $matcher            = new RouteMatcher($collection);
+    function testFoundNoParams2() {
+        $route = (new RouteMatcher())->getRoute(
+            new RouteSearchClass("/tests"), [
+            new Route("/tests/after", RouteMatcherGetRouteTestController2::class),
+            new Route("/tests", $found = RouteMatcherGetRouteTestController1::class)
+        ]);
         $this->assertEquals(
             $found,
-            $matcher->match(new RouteSearchClass("/tests"))->getRouteClassName()
+            $route->getClassName()
         );
     }
 
-    function testRoutingCollectionNoParams3() {
-        $collection         = new RouteCollection(
-            new Route("/tests", RouteMatcherTestController1::class),
-            new Route("/tests/after", $found = RouteMatcherTestController2::class),
-        );
-        $matcher            = new RouteMatcher($collection);
+    function testFoundNoParams3() {
+        $route = (new RouteMatcher())->getRoute(
+            new RouteSearchClass("/tests/after"), [
+            new Route("/tests", RouteMatcherGetRouteTestController1::class),
+            new Route("/tests/after", $found = RouteMatcherGetRouteTestController2::class)
+        ]);
         $this->assertEquals(
             $found,
-            $matcher->match(new RouteSearchClass("/tests/after"))->getRouteClassName()
+            $route->getClassName()
         );
     }
 
-    function testRoutingCollectionWithParams1() {
-        $collection         = new RouteCollection(
-            new Route("/tests/{id}", $found = RouteMatcherTestController1::class),
-            new Route("/tests/after/{id}", RouteMatcherTestController2::class),
-        );
-        $matcher            = new RouteMatcher($collection);
+    function testFoundWithParams1() {
+        $route = (new RouteMatcher())->getRoute(
+            new RouteSearchClass("/tests/12131"), [
+            new Route("/tests/{id}", $found = RouteMatcherGetRouteTestController1::class),
+            new Route("/tests/after/{id}", RouteMatcherGetRouteTestController2::class)
+        ]);
         $this->assertEquals(
             $found,
-            $matcher->match(new RouteSearchClass("/tests/12131"))->getRouteClassName()
+            $route->getClassName()
         );
     }
 
-    function testRoutingCollectionWithParams2() {
-        $collection         = new RouteCollection(
-            new Route("/tests/after/{id}", RouteMatcherTestController2::class),
-            new Route("/tests/{id}", $found = RouteMatcherTestController1::class),
-        );
-        $matcher            = new RouteMatcher($collection);
+    function testFoundWithParams2() {
+        $route = (new RouteMatcher())->getRoute(
+            new RouteSearchClass("/tests/12131"), [
+            new Route("/tests/after/{id}", RouteMatcherGetRouteTestController2::class),
+            new Route("/tests/{id}", $found = RouteMatcherGetRouteTestController1::class)
+        ]);
         $this->assertEquals(
             $found,
-            $matcher->match(new RouteSearchClass("/tests/12131"))->getRouteClassName()
+            $route->getClassName()
         );
     }
 
-    function testRoutingCollectionWithParams3() {
-        $collection         = new RouteCollection(
-            new Route("/tests/method/{id}", $found = RouteMatcherTestController2::class),
-            new Route("/tests/{id}/save", RouteMatcherTestController1::class),
-        );
-        $matcher            = new RouteMatcher($collection);
+    function testFoundWithParams3() {
+        $route = (new RouteMatcher())->getRoute(
+            new RouteSearchClass("/tests/method/save"), [
+            new Route("/tests/method/{id}", $found = RouteMatcherGetRouteTestController2::class),
+            new Route("/tests/{id}/save", RouteMatcherGetRouteTestController1::class)
+        ]);
         $this->assertEquals(
             $found,
-            $matcher->match(new RouteSearchClass("/tests/method/save"))->getRouteClassName()
+            $route->getClassName()
         );
     }
 
-    function testRoutingCollectionWithParams4() {
-        $collection         = new RouteCollection(
-            new Route("/tests/{id}/save", RouteMatcherTestController1::class),
-            new Route("/tests/method/{id}", $found = RouteMatcherTestController2::class),
-            new Route("/tests/{id}/delete", RouteMatcherTestController3::class),
-        );
-        $matcher            = new RouteMatcher($collection);
+    function testFoundWithParams4() {
+        $route = (new RouteMatcher())->getRoute(
+            new RouteSearchClass("/tests/method/save"), [
+            new Route("/tests/{id}/save", RouteMatcherGetRouteTestController1::class),
+            new Route("/tests/method/{id}", $found = RouteMatcherGetRouteTestController2::class),
+            new Route("/tests/{id}/delete", RouteMatcherGetRouteTestController3::class)
+        ]);
         $this->assertEquals(
             $found,
-            $matcher->match(new RouteSearchClass("/tests/method/save"))->getRouteClassName()
+            $route->getClassName()
         );
+    }
+
+    function testFindWithMethod() {
+        $routes                 = [
+            new Route("/tests", RouteMatcherGetRouteTestController1::class),
+        ];
+        $foundList            = (new RouteMatcher())->getRoute(new RouteSearchClass("/tests/get"),$routes, true);
+        $foundView            = (new RouteMatcher())->getRoute(new RouteSearchClass("/tests/get/1212"),$routes, true);
+        $foundPost            = (new RouteMatcher())->getRoute(new RouteSearchClass("/tests/get", "POST"),$routes, true);
+        $this->assertEquals([
+            RouteMatcherGetRouteTestController1::class,
+            "methodList",
+
+            RouteMatcherGetRouteTestController1::class,
+            "methodView",
+
+            RouteMatcherGetRouteTestController1::class,
+            "methodPost"
+        ],[
+            $foundList->getClassName(),
+            $foundList->getClassMethod(),
+
+            $foundView->getClassName(),
+            $foundView->getClassMethod(),
+
+            $foundPost->getClassName(),
+            $foundPost->getClassMethod()
+        ]);
+    }
+
+    function testNotFoundWithMethod() {
+        $routes                 = [
+            new Route("/tests", RouteMatcherGetRouteTestController1::class),
+        ];
+        $notFound             = (new RouteMatcher())->getRoute(new RouteSearchClass("/tests/not"),$routes, true);
+        $this->assertEquals([
+            null
+        ],[
+            $notFound
+        ]);
+    }
+
+    function testNotFoundNoMethod() {
+        $routes                 = [
+            new Route("/tests", RouteMatcherGetRouteTestController2::class),
+        ];
+        $notFound             = (new RouteMatcher())->getRoute(new RouteSearchClass("/tests"),$routes, true);
+        $this->assertEquals([
+            null
+        ],[
+            $notFound
+        ]);
+    }
+
+    function testExceptionClass() {
+        $this->expectException(RuntimeException::class);
+        (new RouteMatcher())->getRoute(new RouteSearchClass("/tests/not"),[
+            new Route("/tests", "unknownClass")
+        ], true);
     }
 }
 
-class RouteMatcherTestController1 {}
-class RouteMatcherTestController2 {}
-class RouteMatcherTestController3 {}
+class RouteMatcherGetRouteTestController1 {
+    /**
+     * @Route/method GET
+     * @Route/uri /get
+     * @return string
+     */
+    function methodList() : string {
+        return "methodLIst";
+    }
+    /**
+     * @Route/method GET
+     * @Route/uri /get/{id}
+     * @return string
+     */
+    function methodView() : string {
+        return "methodView";
+    }
+    /**
+     * @Route/method POST
+     * @Route/uri /get
+     * @return string
+     */
+    function methodPost() : string {
+        return "methodPost";
+    }
+}
+class RouteMatcherGetRouteTestController2 {
+    /**
+     * @param string $data
+     */
+    function methodList(string $data) : void {}
+}
+class RouteMatcherGetRouteTestController3 {}

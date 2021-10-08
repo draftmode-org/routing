@@ -5,7 +5,9 @@ namespace Terrazza\Component\Routing;
 interface RouteMatcherInterface {
     /**
      * @param RouteSearchClass $routeSearch
-     * @return Route|null
+     * @param array|Route[] $routes
+     * @param bool $hasMethods
+     * @return RouteMatcherFoundClass|null
      */
-    public function match(RouteSearchClass $routeSearch) :?Route;
+    public function getRoute(RouteSearchClass $routeSearch, array $routes, bool $hasMethods) :?RouteMatcherFoundClass;
 }
