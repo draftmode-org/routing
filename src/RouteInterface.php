@@ -11,6 +11,11 @@ interface RouteInterface
     public function hasMethod(string $method) : bool;
 
     /**
+     * @return array|null
+     */
+    public function getMethod() : ?array;
+
+    /**
      * @return string
      */
     public function getRouteUri() : string;
@@ -19,10 +24,4 @@ interface RouteInterface
      * @return string
      */
     public function getRouteClassName() : string;
-
-    /**
-     * @param string $uri
-     * @return RouteFoundClass|null
-     */
-    public function getMatchedRoute(string $uri) :?RouteFoundClass;
 }

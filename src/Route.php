@@ -30,6 +30,13 @@ class Route implements RouteInterface {
     }
 
     /**
+     * @return array|null
+     */
+    public function getMethod(): ?array {
+        return $this->methods;
+    }
+
+    /**
      * @return string
      */
     public function getRouteUri() : string {
@@ -41,31 +48,5 @@ class Route implements RouteInterface {
      */
     public function getRouteClassName() : string {
         return $this->routeClassName;
-    }
-
-    /**
-     * @param string $uri
-     * @return RouteFoundClass|null
-     */
-    public function getMatchedRoute(string $uri) :?RouteFoundClass {
-        $uri                                        = trim($uri, "/");
-        $routePath                                  = trim($this->routeUri, "/");
-        $preMatchPosition                           = 0;
-        if (preg_match_all('#\{([\w\_]+)\}#', $routePath, $matches, PREG_OFFSET_CAPTURE)) {
-            $preMatchPosition                       = $matches[1][0][1];
-        }
-        if (strlen($routePath) === 0 && strlen($uri) === 0) {
-            return new RouteFoundClass($this, 0);
-        }
-        $rRoutePath                                 = $routePath;
-        $routePath                                  = '^' . preg_replace('#\{[\w\_]+\}#', '(.+?)', $routePath) . '$';
-        if (preg_match("#".$routePath."#", trim($uri, "/"), $matches)) {
-            return new RouteFoundClass($this, $preMatchPosition);
-        } else {
-            if (strlen($rRoutePath) && strpos($uri, $rRoutePath) !== false) {
-                return new RouteFoundClass($this, 0);
-            }
-            return null;
-        }
     }
 }

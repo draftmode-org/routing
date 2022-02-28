@@ -1,5 +1,5 @@
 <?php
-namespace Terrazza\Component\Routing\Tests;
+namespace Terrazza\Component\Routing\Tests\Common;
 use PHPUnit\Framework\TestCase;
 use Terrazza\Component\Routing\Route;
 use Terrazza\Component\Routing\RouteFoundClass;

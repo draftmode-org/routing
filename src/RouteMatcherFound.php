@@ -1,15 +1,20 @@
 <?php
 namespace Terrazza\Component\Routing;
 
-class RouteMatcherFoundClass {
+class RouteMatcherFound {
+    private string $uri;
     private string $className;
     private ?string $classMethod;
 
-    public function __construct(string $className, string $classMethod=null) {
+    public function __construct(string $uri, string $className, string $classMethod=null) {
+        $this->uri                                  = $uri;
         $this->className                            = $className;
         $this->classMethod                          = $classMethod;
     }
 
+    public function getUri() : string {
+        return $this->uri;
+    }
     /**
      * @return string
      */

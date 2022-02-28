@@ -23,7 +23,8 @@
   </php>
   <testsuites>
     <testsuite name="Terrazza Routing Component Test">
-      <directory>./tests/</directory>
+      <file>./tests/RouteMatcherTest.php</file>
+      <!--<directory>./tests/</directory>-->
     </testsuite>
   </testsuites>
 </phpunit>
