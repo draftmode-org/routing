@@ -3,8 +3,9 @@
 namespace Terrazza\Component\Routing;
 
 use Psr\Log\LoggerInterface;
+use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
-use RuntimeException;
 use Throwable;
 
 class RouteMatcher implements IRouteMatcher {
@@ -22,177 +23,157 @@ class RouteMatcher implements IRouteMatcher {
 
     public function __construct(LoggerInterface $logger, string $annotation=null) {
         $this->logger                               = $logger;
-        @unlink("log.txt");
         $this->annotation                           = $annotation ?? self::DEFAULT_ANNOTATION;
     }
 
     /**
-     * @param RouteSearchClass $routeSearch
-     * @param array|Route[] $routes
-     * @param bool $hasMethods
-     * @return RouteMatcherFound|null
+     * @param RouteSearch $routeSearch
+     * @param Route[] $routes
+     * @return Route|null
      */
-    public function getRoute(RouteSearchClass $routeSearch, array $routes) :?RouteMatcherFound {
-        $this->logger->debug("getRoute for uri: ".$routeSearch->getSearchUri().", method: ".$routeSearch->getSearchMethod(), ["line" => __LINE__, "method" => __METHOD__]);
-        if ($route = $this->getMatchRoute($routeSearch, $routes)) {
-
-            $this->logger->debug("route found for ".$route->getRouteClassName().", evaluate methods", ["line" => __LINE__, "method" => __METHOD__]);
-
-            if ($methodFound = $this->getMethod($routeSearch, $route)) {
-                $this->logger->debug("route found, method found", ["line" => __LINE__, "method" => __METHOD__]);
-                return new RouteMatcherFound(
-                    $methodFound->getRoute()->getRouteUri(),
-                    $route->getRouteClassName(),
-                    $methodFound->getRoute()->getRouteClassName()
-                );
+    public function getRoute(RouteSearch $routeSearch, array $routes) :?Route {
+        $this->logger->debug("find route for ".$routeSearch->getUri().", method: ".$routeSearch->getMethod(), [
+            "line" => __LINE__, "method" => __METHOD__]);
+        try {
+            if ($classRoute = $this->getClassMatch($routeSearch, $routes)) {
+                if ($classMethodRoute = $this->getClassMethodMatch($routeSearch, $classRoute)) {
+                    return $classMethodRoute;
+                } else {
+                    $this->logger->debug("classRoute found, classMethodRoute not found", [
+                        "line" => __LINE__, "method" => __METHOD__]);
+                }
             } else {
-                $this->logger->debug("route found, method not found", ["line" => __LINE__, "method" => __METHOD__]);
-                return null;
+                $this->logger->debug("classRoute not found", [
+                    "line" => __LINE__, "method" => __METHOD__]);
             }
-        } else {
-            $this->logger->debug("route not found", ["line" => __LINE__, "method" => __METHOD__]);
+            return null;
+        } catch (Throwable $exception) {
+            $this->logger->error("getRoute unexpected exception, ".$exception->getMessage(), [
+                "exception" => $exception,
+                "line" => __LINE__, "method" => __METHOD__]);
             return null;
         }
     }
 
     /**
-     * @param RouteSearchClass $routeSearch
-     * @param array $routes
+     * @param RouteSearch $routeSearch
+     * @param Route[] $routes
      * @return Route|null
      */
-    private function getMatchRoute(RouteSearchClass $routeSearch, array $routes) :?Route {
-        $useRouteMatch                              = null;
+    private function getClassMatch(RouteSearch $routeSearch, array $routes) :?Route {
+        $foundRoute                                 = null;
         foreach ($routes as $route) {
-            if ($routeMatch = $this->getMatchedRoute($route, $routeSearch, true)) {
-                $useRouteMatch                      = $this->getBestRouteMatch($routeMatch, $useRouteMatch);
+            if ($routeMatch = $this->routeMatch($routeSearch, $route, true)) {
+                $foundRoute                         = $this->getBestRouteMatch($routeMatch, $foundRoute);
+                $this->logger->debug("classRoute matches", [
+                    "position"                      => $foundRoute->getPosition(),
+                    "line" => __LINE__, "method" => __METHOD__]);
             }
         }
-        if ($useRouteMatch) {
-            return $useRouteMatch->getRoute();
+        return $foundRoute ? $foundRoute->getRoute() : null;
+    }
+
+    /**
+     * @param RouteSearch $routeSearch
+     * @param Route $classRoute
+     * @return Route|null
+     * @throws ReflectionException
+     */
+    private function getClassMethodMatch(RouteSearch $routeSearch, Route $classRoute) :?Route {
+        $routes                                     = $this->getClassMethodRoutes($classRoute);
+        $foundRoute                                 = null;
+        /** @var Route $classMethodRoute */
+        foreach ($routes as $route) {
+            if ($routeFound = $this->routeMatch($routeSearch, $route, false)) {
+                $foundRoute                         = $this->getBestRouteMatch($routeFound, $foundRoute);
+                $this->logger->debug("classRoute and classMethodRoute match", [
+                    "position"                      => $foundRoute->getPosition(),
+                    "line" => __LINE__, "method" => __METHOD__]);
+            }
+        }
+        return $foundRoute ? $foundRoute->getRoute() : null;
+    }
+
+    /**
+     * @param RouteSearch $routeSearch
+     * @param Route $route
+     * @param bool $optionalUriEnding
+     * @return RouteFound|null
+     */
+    private function routeMatch(RouteSearch $routeSearch, Route $route, bool $optionalUriEnding) : ?RouteFound {
+        $this->logger->debug("search for", [
+            "searchUri" => $routeSearch->getUri(),
+            "searchMethod" => $routeSearch->getMethod(),
+            "findUri" => $route->getUri(),
+            "findMethods" => $route->getMethods(),
+            "routeClassName" => $route->getClassName(),
+            "routeClassMethodName" => $route->getClassMethodName(),
+            "method"    => __METHOD__, "line" => __LINE__]);
+        if ($route->hasMethod($routeSearch->getMethod())) {
+            $searchUri                              = trim($routeSearch->getUri(), "/");
+            $findUri                                = trim($route->getUri(), "/");
+            if ($searchUri === $findUri) {
+                $this->logger->debug("searchUri identically findUri", [
+                    "method"    => __METHOD__, "line" => __LINE__]);
+                return new RouteFound($route, 0);
+            }
+            $findArgument                           = strpos($findUri, "{");
+            $pattern                                = '^' . preg_replace('#\{[\w\_]+\}#', '(.+?)', $findUri);
+            $pattern                                .= $optionalUriEnding ? "(.*?)" : "$";
+
+            if (preg_match("~".$pattern."~", $searchUri, $matches)) {
+                if (strpos($matches[1] ?? "", "/") !== false) {
+                    $this->logger->debug("optional arguments include includes /, route is ignored", [
+                        "searchUri" => $searchUri,
+                        "findUri"   => $findUri,
+                        "matches"   => $matches,
+                        "method"    => __METHOD__, "line" => __LINE__]);
+                    return null;
+                }
+                return new RouteFound($route, $findArgument ?? 0);
+            }
+        } else {
+            $this->logger->debug("routeMethod(s) does not match searchMethod", [
+                "method" => __METHOD__, "line" => __LINE__]);
         }
         return null;
     }
 
-
     /**
-     * @param RouteSearchClass $routeSearch
-     * @param Route $route
-     * @return RouteFoundClass|null
-     * @throws RuntimeException|null
+     * @param Route $classRoute
+     * @return Route[]
+     * @throws ReflectionException
      */
-    private function getMethod(RouteSearchClass $routeSearch, Route $route) :?RouteFoundClass {
-        $rClassName                                 = $route->getRouteClassName();
-        try {
-            $rClass                                 = new \ReflectionClass($rClassName);
-            $useRouteMatch                          = null;
-            foreach ($rClass->getMethods() as $method) {
-                if (!$method->isPublic()) continue;
-                $this->logger->notice("try to match method in class", [
-                        "className"     => $rClassName,
-                        "methodName"    => $method->getName(),
-                        "method" => __METHOD__, "line" => __LINE__]);
-                if ($methodRoute = $this->getMethodRoute($route, $method)) {
-                    if ($routeMatch = $this->getMatchedRoute($methodRoute, $routeSearch, false)) {
-                        $useRouteMatch              = $this->getBestRouteMatch($routeMatch, $useRouteMatch);
-                    }
-                }
+    private function getClassMethodRoutes(Route $classRoute) : array {
+        $rClassName                                 = $classRoute->getClassName();
+        $routes                                     = [];
+        $rClass                                     = new ReflectionClass($rClassName);
+        foreach ($rClass->getMethods() as $method) {
+            if (!$method->isPublic()) continue;
+            if ($route = $this->buildClassMethodRoute($classRoute, $method)) {
+                $routes[]                       = $route;
             }
-            return $useRouteMatch;
-        } catch (Throwable $exception) {
-            throw new RuntimeException("getMethod failure", $exception->getCode(), $exception);
         }
+        return $routes;
     }
 
     /**
-     * @param RouteFoundClass $routeMatch
-     * @param RouteFoundClass|null $lastRouteMatch
-     * @return RouteFoundClass
-     */
-    private function getBestRouteMatch(RouteFoundClass $routeMatch, RouteFoundClass $lastRouteMatch=null) : RouteFoundClass {
-        if ($lastRouteMatch) {
-            if ($lastRouteMatch->getPreMatchPosition() > $routeMatch->getPreMatchPosition()) {
-                return $lastRouteMatch;
-            }
-        }
-        return $routeMatch;
-    }
-
-    /**
-     * @param RouteInterface $route
-     * @param RouteSearchClass $routeSearch
-     * @param bool $endOptional
-     * @return RouteFoundClass|null
-     */
-    private function getMatchedRoute(RouteInterface $route, RouteSearchClass $routeSearch, bool $endOptional=false) :?RouteFoundClass {
-        if (!$route->hasMethod($routeSearch->getSearchMethod())) {
-            $this->logger->notice("routeMethods does not match searchMethod", [
-                "routeMethods" => $route->getMethod(),
-                "searchMethod" => $routeSearch->getSearchMethod(),
-                "method" => __METHOD__, "line" => __LINE__]);
-            return null;
-        }
-        $uri                                        = $routeSearch->getSearchUri();
-        $this->logger->notice("search for ".$route->getRouteUri(). " in ".$uri, [
-            "method" => __METHOD__, "line" => __LINE__]);
-        $uri                                        = trim($uri, "/");
-        $routePath                                  = trim($route->getRouteUri(), "/");
-        $preMatchPosition                           = 0;
-        if (preg_match_all('#\{([\w\_]+)\}#', $routePath, $matches, PREG_OFFSET_CAPTURE)) {
-            $preMatchPosition                       = $matches[1][0][1];
-        }
-        if (strlen($routePath) === 0 && strlen($uri) === 0) {
-            return new RouteFoundClass($route, 0);
-        }
-        $rRoutePath                                 = $routePath;
-        $routePath                                  = '^' . preg_replace('#\{[\w\_]+\}#', '(.+?)', $routePath);
-        $routePath                                  .= $endOptional ? "(.*?)" : "$";
-        if (preg_match("~".$routePath."~", trim($uri, "/"), $matches)) {
-            if (strpos($matches[1] ?? "", "/") !== false) {
-                $this->logger->notice("optional arguments include includes /", [
-                    "routePath" => $routePath,
-                    "uri" => trim($uri, "/"),
-                    "matches" => $matches,
-                    "method" => __METHOD__, "line" => __LINE__]);
-                return null;
-            }
-            $this->logger->notice("found match", [
-                "routePath" => $routePath,
-                "uri" => trim($uri, "/"),
-                "method" => __METHOD__, "line" => __LINE__]);
-            return new RouteFoundClass($route, $preMatchPosition);
-        } else {
-            if (strlen($rRoutePath) && $uri === $rRoutePath) {
-                $this->logger->notice("found match, uri == routePath", [
-                    "routePath" => $routePath,
-                    "uri" => trim($uri, "/"),
-                    "method" => __METHOD__, "line" => __LINE__]);
-                return new RouteFoundClass($route, 0);
-            }
-            $this->logger->notice("no match found", [
-                "routePath" => $routePath,
-                "uri" => trim($uri, "/"),
-                "method" => __METHOD__, "line" => __LINE__]);
-            return null;
-        }
-    }
-
-    /**
-     * @param Route $route
-     * @param ReflectionMethod $method
+     * @param Route $classRoute
+     * @param ReflectionMethod $classMethod
      * @return Route|null
      */
-    private function getMethodRoute(Route $route, ReflectionMethod $method) :?Route {
+    private function buildClassMethodRoute(Route $classRoute, ReflectionMethod $classMethod) :?Route {
         $uri                                        = null;
         $methods                                    = null;
-        if ($subject = $method->getDocComment()) {
+        if ($subject = $classMethod->getDocComment()) {
             $pattern                                = sprintf(self::ANNOTATION_REGEX, preg_quote($this->annotation, "/"));
             if (preg_match_all($pattern, $subject, $matches)) {
+                $uri                                = "/";
                 foreach ($matches[1] as $match) {
                     list($argument, $value)         = explode(" ", $match, 2);
                     switch (trim($argument)) {
                         case "/uri":
-                            $value                  = trim($value, "/");
-                            $uri                    = $route->getRouteUri() . "/" . $value;
+                            $uri                    = trim($value);
                             break;
                         case "/method":
                             $methods                = explode(",", trim($value));
@@ -202,9 +183,33 @@ class RouteMatcher implements IRouteMatcher {
             }
         }
         if ($uri) {
-            return new Route($uri, $method->getName(), $methods);
+            $this->logger->debug("withMethodFilter", [
+                "className"                         => $classRoute->getClassName(),
+                "classMethodName"                   => $classMethod->getName(),
+                "uri"                               => $uri,
+                "methods"                           => $methods,
+                "method" => __METHOD__, "line" => __LINE__]);
+            return $classRoute->withMethodFilter($uri, $classMethod->getName(), $methods);
         } else {
+            $this->logger->debug("method does not have any docComment within @".$this->annotation." annotation", [
+                "className"                         => $classRoute->getClassName(),
+                "classMethodName"                   => $classMethod->getName(),
+                "method" => __METHOD__, "line" => __LINE__]);
             return null;
         }
+    }
+
+    /**
+     * @param RouteFound $routeMatch
+     * @param RouteFound|null $lastRouteMatch
+     * @return RouteFound
+     */
+    private function getBestRouteMatch(RouteFound $routeMatch, RouteFound $lastRouteMatch=null) : RouteFound {
+        if ($lastRouteMatch) {
+            if ($lastRouteMatch->getPosition() < $routeMatch->getPosition()) {
+                return $lastRouteMatch;
+            }
+        }
+        return $routeMatch;
     }
 }

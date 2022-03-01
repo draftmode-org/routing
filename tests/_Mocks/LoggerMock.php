@@ -2,6 +2,7 @@
 namespace Terrazza\Component\Routing\Tests\_Mocks;
 use DateTime;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 class LoggerMock implements LoggerInterface {
     private ?string $stream;
@@ -36,6 +37,13 @@ class LoggerMock implements LoggerInterface {
                 $text[]                             = $context[$cKey];
                 unset($context[$cKey]);
             }
+            $exception                              = null;
+            $cKey                                   = "exception";
+            if (is_array($context) && array_key_exists($cKey, $context)) {
+                /** @var Throwable $exception */
+                $exception                          = $context[$cKey];
+                unset($context[$cKey]);
+            }
             $messages[]                             = join(" ", $text);
             if ($context && count($context)) {
                 $messages[]                         = json_encode($context);
@@ -43,6 +51,9 @@ class LoggerMock implements LoggerInterface {
             if ($this->firstLine) {
                 file_put_contents($this->stream, PHP_EOL, FILE_APPEND);
                 $this->firstLine                    = false;
+            }
+            if ($exception) {
+                $messages[]                         = $exception->getTraceAsString();
             }
             file_put_contents($this->stream, join(PHP_EOL, $messages).PHP_EOL, FILE_APPEND);
         }

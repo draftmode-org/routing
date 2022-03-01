@@ -5,31 +5,65 @@ use Terrazza\Component\Routing\Route;
 
 class RouteTest extends TestCase {
 
-    function testSimpleRoute() {
+    function testSimple() {
         $route = new Route(
-            $uri = "route", $routeClassName = "routeClassName", ["GET"]
+            $uri = "route", $className = "className", ["GET"], $arguments = ["a" => "b"]
         );
         $this->assertEquals([
             true,
             false,
             $uri,
-            $routeClassName
+            $className,
+            $arguments,
+            null
         ],[
             $route->hasMethod("GET"),
             $route->hasMethod("POST"),
-            $route->getRouteUri(),
-            $route->getRouteClassName(),
+            $route->getUri(),
+            $route->getClassName(),
+            $route->getArguments(),
+            $route->getClassMethodName()
         ]);
     }
 
-    function testRouteWithoutMethod() {
+    function testRouteOptionals() {
         $route = new Route(
-            $uri = "/route/", "routeClassName"
+            "/route/", "routeClassName", ["GET"]
         );
         $this->assertEquals([
             true,
+            false,
+
+            []
         ],[
-            $route->hasMethod("GET")
+            $route->hasMethod("GET"),
+            $route->hasMethod("POST"),
+            
+            $route->getArguments()
+        ]);
+    }
+
+    function testRouteWithMethodFilter() {
+        $route = new Route(
+            $uri = "route", $className = "className"
+        );
+        $methodRoute = $route->withMethodFilter($uri2 = "yes", $methodName = "methodName", $methods = ["GET"]);
+        $this->assertEquals([
+            $uri,
+            $className,
+
+            $uri . "/" . $uri2,
+            $className,
+            $methodName,
+            $methods
+        ], [
+            $route->getUri(),
+            $route->getClassName(),
+
+            $methodRoute->getUri(),
+            $methodRoute->getClassName(),
+            $methodRoute->getClassMethodName(),
+            $methodRoute->getMethods()
         ]);
     }
 }
