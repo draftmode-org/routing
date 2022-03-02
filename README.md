@@ -1,102 +1,141 @@
 # the routing component
-The class provides two methods to get a route from a route collection.
-1. Route forwards to a Class
-2. Routes are split into a mainController and methods with annotations inside
- 
-### Route forwards to a Class
+The component match routes.<br>
+_The component does not include any class loading or injection._<br>
+_The only goal is: **find/match routes**_
+
+1. Object/Classes
+    1. [Route](#object-route)
+    1. [RouteSearch](#object-route-search)
+    3. [RouteMatcher](#object-route-matcher)
+2. [Install](#install)
+3. [Requirements](#require)
+4. [Examples](#examples) 
+
+## Object/Classes
+<a id="object-route" name="object-route"></a>
+<a id="user-content-object-route" name="user-content-object-route"></a>
+### Route
+The class covers the "route" to a given Controller ($className).
+Properties:
+- uri (string, required)
+- className (string, required)
+- methods (array, optional)
+- arguments (array, optional)
+#### method: hasMethod(string $method) : bool
+If the [Route](#object-route) includes methods (which is optional) hasMethod validate the give one.<br>
+_notice:<br>
+$method "HEAD" will be replaced with "GET"_
+
+<a id="object-route-search" name="object-route-search"></a>
+<a id="user-content-object-route-search" name="user-content-object-route-search"></a>
+### RouteSearch
+The class covers the base uri, method and arguments. All [Routes](#object-route) are matched against this object.<br>
+Properties:
+- uri (string, required)
+- method (string, required, default=GET)
+- arguments (array, optional)
+
+<a id="object-route-matcher" name="object-route-matcher"></a>
+<a id="user-content-object-route-matcher" name="user-content-object-route-matcher"></a>
+### RouteMatcher
+#### method: getRoute(RouteSearch $routeSearch, array $routes) :?Route
+To get a route is done in two steps.
+1. match Route->uri against routeSearch->uri + method + arguments
+2. get all public methods within the annotation @Route/uri and match against routeSearch + method + arguments
+<br>**The annotation URI is without the Controller Route Uri and is required**
+
+
+<a id="install" name="install"></a>
+<a id="user-content-install" name="user-content-install"></a>
+## How to install
+### Install via composer
 ```
-$route = (new RouteMatcher())->getRoute(
-    new RouteSearchClass("/tests/method/save"), [
-        new Route("/tests/{id}/save", Controller1::class),
-        new Route("/tests/method/{id}", Controller2::class),
-        new Route("/tests/{id}/delete", Controller3::class)
-    ]
-);
-echo $route->getClassName(); // Controller2::class
+composer require terrazza/routing
+```
+<a id="require" name="require"></a>
+<a id="user-content-require" name="user-content-require"></a>
+## Requirements
+### php version
+- \>= 7.4
+### composer packages
+- psr/log
 
-class Controller1 {}
-class Controller2 {}
-class Controller2 {}
+<a id="examples" name="examples"/></a>
+<a id="user-content-examples" name="user-content-examples"/></a>
+## Examples
+**notice: The example requires a Psr\Log\LoggerInterface implementation**<br>
+
 ```
 
-### Routes are split into RouteMainClass and Methods inside
-To split the routing into a mainController and methods inside is useful if you want to group 
-methods for a given route. 
+use Terrazza\Component\Routing\Route;
+use Terrazza\Component\Routing\RouteMatcher;
+use Terrazza\Component\Routing\RouteSearch;
 
-To get a valid method from a class a method annotation is required!<br>
-@Route/uri {string} <b>(required)</b><br>
-<i>the uri is based on his parent class and is the extension of it</i><br>
-@Route/method {string} <b>(optional)</b><br>
-
-The default prefix for that annotation /uri and /method is @Route.<br>
-<i>can be modified within the __constructor of RouteMatcher</i><br><br>
-
-```
-$routes = [
-    new Route("/payments", MainController1::class),
-    new Route("/customers", MainController2::class),
-];
-// example1
-$route = (new RouteMatcher())->getRoute(
-    new RouteSearchClass("/payments"), // default method: GET
-    $routes,
-    true 
-);
-echo $route->getClassName();    // MainController1::class
-echo $route->getClassMethod();  // methodList
-
-// example2
-$route = (new RouteMatcher())->getRoute(
-    new RouteSearchClass("/payments/1212"), // default method: GET
-    $routes,
-    true 
-);
-echo $route->getClassName();    // MainController1::class
-echo $route->getClassMethod();  // methodView
-
-// example3
-$route = (new RouteMatcher())->getRoute(
-    new RouteSearchClass("/payments", "POST"),
-    $routes,
-    true 
-);
-echo $route->getClassName();    // MainController1::class
-echo $route->getClassMethod();  // methodPost
-
-class MainController1 {
+class ControllerPayment {
     /**
      * @Route/method GET
-     * @Route/uri /
+     * @Route/uri /view1
      * @return string
      */
-    function methodList() : string {
-        return "methodLIst";
+    function methodView1() : string {
+        return "methodView1";
     }
+
     /**
      * @Route/method GET
      * @Route/uri /{id}
      * @return string
      */
-    function methodView() : string {
-        return "methodView";
+    function methodById() : string {
+        return "methodById";
     }
+
     /**
-     * @Route/method POST
-     * @Route/uri /
+     * @Route/method GET
+     * @Route/uri /view3
      * @return string
      */
-    function methodPost() : string {
-        return "methodPost";
+    function methodView3() : string {
+        return "methodView3";
     }
 }
 
-class MainController2 {
+class ControllerPaymentView {
     /**
-     * @param string $data
+     * @Route/method GET
+     * @Route/uri /{id}
+     * @return string
      */
-    function methodList(string $data) : void {}
+    function paymentView() : string {
+        return "paymentView";
+    }
 }
 
-class MainController3 {
-}
+$routes     = [
+    new Route("payment", ControllerPayment::class),
+    new Route("payment/view", ControllerPaymentView::class),
+];
+
+//
+// Psr\Log\LoggerInterface implementation
+//
+$logger = "IMPORTANT ! has to initialized";
+
+echo (new RouteMatcher($logger))
+    ->getRoute(new RouteSearch("payment/view1"), $routes)->getClassMethodName();
+// found in ControllerPayment, method methodView1
+
+echo (new RouteMatcher($logger))
+    ->getRoute(new RouteSearch("payment/view/1"), $routes)->getClassMethodName();
+// found ControllerPayment, method methodView2 but will be skipped cause $id includes /
+// found in ControllerPaymentView, method paymentView
+
+echo (new RouteMatcher($logger))
+    ->getRoute(new RouteSearch("payment/view3"), $routes)->getClassMethodName(),
+// found in ControllerPayment, method methodView3  
+
+echo (new RouteMatcher($logger))
+    ->getRoute(new RouteSearch("payment/view4"), $routes)->getClassMethodName(),
+// found in ControllerPayment, method methodById      
+
 ```

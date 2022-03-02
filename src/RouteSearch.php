@@ -22,8 +22,7 @@ class RouteSearch {
      * @param string $method
      * @param array|null $arguments
      */
-    public function __construct(string $uri, string $method="GET", ?array $arguments=null)
-    {
+    public function __construct(string $uri, string $method="GET", ?array $arguments=null){
         $this->uri = $uri;
         $this->method = $method;
         $this->arguments = $arguments;

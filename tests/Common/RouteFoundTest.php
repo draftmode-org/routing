@@ -9,13 +9,13 @@ class RouteFoundTest extends TestCase {
         $class = new RouteFound($route = new Route(
             "uri",
             "routeClass"
-        ), $position = 10);
+        ), $staticUriLen = 10);
         $this->assertEquals([
             $route,
-            $position
+            $staticUriLen
         ],[
             $class->getRoute(),
-            $class->getPosition()
+            $class->getStaticUriLen()
         ]);
     }
 }

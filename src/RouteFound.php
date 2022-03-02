@@ -3,11 +3,11 @@ namespace Terrazza\Component\Routing;
 
 class RouteFound {
     private Route $route;
-    private int $position;
+    private int $staticUriLen;
 
-    public function __construct(Route $route, int $position) {
+    public function __construct(Route $route, int $staticUriLen) {
         $this->route                                = $route;
-        $this->position                             = $position;
+        $this->staticUriLen                         = $staticUriLen;
     }
 
     /**
@@ -21,9 +21,9 @@ class RouteFound {
     /**
      * @return int
      */
-    public function getPosition(): int
+    public function getStaticUriLen(): int
     {
-        return $this->position;
+        return $this->staticUriLen;
     }
 
 }

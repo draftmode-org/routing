@@ -18,7 +18,6 @@ class RouteMatcherGetRouteTest extends TestCase {
         ];
         $this->assertEquals([
             null,                   // classRoute not found
-            null,                   // classMethod not found
             null,                   // classMethod method not found
 
             "methodList",
@@ -27,11 +26,11 @@ class RouteMatcherGetRouteTest extends TestCase {
             "methodPost",
             "methodView",
             "methodView",
+            "methodViewDetail",
             "methodPut",
             "methodPut",
         ], [
             ($this->getRouteMatcher())->getRoute(new RouteSearch("unknown"), $routes),
-            ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/1234/12"), $routes),
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment", "DELETE"), $routes),
 
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment"), $routes)->getClassMethodName(),
@@ -40,6 +39,7 @@ class RouteMatcherGetRouteTest extends TestCase {
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/", "POST"), $routes)->getClassMethodName(),
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/1234"), $routes)->getClassMethodName(),
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/1234/"), $routes)->getClassMethodName(),
+            ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/1234/4567"), $routes)->getClassMethodName(),
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/1234", "PUT"), $routes)->getClassMethodName(),
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/1234/", "PUT"), $routes)->getClassMethodName(),
         ]);
@@ -59,18 +59,18 @@ class RouteMatcherGetRouteTest extends TestCase {
         $this->assertNull($this->getRouteMatcher()->getRoute(new RouteSearch("payment"), $routes));
     }
 
-    function xtestBestMethodMatch() {
+    function testBestMethodMatch() {
         $routes     = [
             new Route("payment", RouteMatcherGetRouteTestControllerPayment::class),
             new Route("payment/view", RouteMatcherGetRouteTestControllerPaymentView::class),
         ];
         $this->assertEquals([
             "methodView1",
-            "paymentView",
+            "methodView",
             "methodView3",
             "methodView2",
         ], [
-            ($this->getRouteMatcher(true))->getRoute(new RouteSearch("payment/view1"), $routes)->getClassMethodName(),
+            ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/view1"), $routes)->getClassMethodName(),
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/view/1"), $routes)->getClassMethodName(),
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/view3"), $routes)->getClassMethodName(),
             ($this->getRouteMatcher())->getRoute(new RouteSearch("payment/view4"), $routes)->getClassMethodName(),
@@ -94,6 +94,22 @@ class RouteMatcherGetRouteTestController {
      */
     function methodView() : string {
         return "methodView";
+    }
+    /**
+     * @Route/method GET
+     * @Route/uri /{id}/{detail}
+     * @return string
+     */
+    function methodViewDetail() : string {
+        return "methodViewDetail";
+    }
+    /**
+     * @Route/method GET
+     * @Route/uri /{id}/view/{detail}
+     * @return string
+     */
+    function methodViewViewDetail() : string {
+        return "methodViewViewDetail";
     }
     /**
      * @Route/method PUT
