@@ -80,7 +80,7 @@ class RouteMatcher implements IRouteMatcher {
      * @param bool $matchClass
      * @return RouteFound|null
      */
-    private function routeMatch(RouteSearch $routeSearch, Route $route, bool $matchClass) : ?RouteFound {
+    public function routeMatch(RouteSearch $routeSearch, Route $route, bool $matchClass) : ?RouteFound {
         $this->logger->debug("search for", [
             "searchUri"                             => $routeSearch->getUri(),
             "searchMethod"                          => $routeSearch->getMethod(),
