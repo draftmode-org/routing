@@ -7,19 +7,13 @@ class Route {
      */
     private string $uri;
     /**
-     * @var array|null
+     * @var string
      */
-    private ?array $methods;
+    private string $method;
 
-    /**
-     * @var array
-     */
-    private array $arguments;
-
-    public function __construct(string $uri, ?array $methods=null, ?array $arguments=null) {
+    public function __construct(string $uri, string $method="get") {
         $this->uri                                  = $uri;
-        $this->methods                              = $methods ?? [];
-        $this->arguments                            = $arguments ?? [];
+        $this->method                               = strtolower($method);
     }
 
     /**
@@ -30,34 +24,9 @@ class Route {
     }
 
     /**
-     * @param string $method
-     * @return bool
+     * @return string
      */
-    public function hasMethod(string $method) : bool {
-        if (count($this->methods)) {
-            if ($method === "HEAD") $method = "GET";
-            foreach ($this->methods as $routeMethod) {
-                if (strtolower($method) === strtolower($routeMethod)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @return array
-     */
-    public function getMethods(): array {
-        return $this->methods;
-    }
-
-    /**
-     * @return array
-     */
-    public function getArguments(): array
-    {
-        return $this->arguments;
+    public function getMethod() : string {
+        return $this->method;
     }
 }

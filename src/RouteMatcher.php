@@ -35,8 +35,8 @@ class RouteMatcher implements IRouteMatcher {
             "searchUri"                             => $routeSearch->getUri(),
             "searchMethod"                          => $routeSearch->getMethod(),
             "findUri"                               => $route->getUri(),
-            "findMethods"                           => $route->getMethods()]);
-        if ($route->hasMethod($routeSearch->getMethod())) {
+            "findMethod"                            => $route->getMethod()]);
+        if ($route->getMethod() === $routeSearch->getMethod()) {
             $searchUri                              = trim($routeSearch->getUri(), "/");
             $findUri                                = trim($route->getUri(), "/");
 
